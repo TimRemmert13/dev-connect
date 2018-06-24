@@ -1,5 +1,4 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const passport = require('passport');
 
 const router = express.Router();
@@ -54,9 +53,9 @@ router.get('/all', (req, res) => {
         return res.status(404).json(errors);
       }
 
-      res.json(profiles);
+      return res.json(profiles);
     })
-    .catch(err => res.status(404).json({ profile: 'There are no profiles' }));
+    .catch(res.status(404).json({ profile: 'There are no profiles' }));
 });
 
 /**
@@ -143,23 +142,22 @@ router.post('/', passport.authenticate('jwt', { session: false }), (req, res) =>
           { $set: profileFields },
           { new: true },
         )
-          .then(profile => res.json(profile));
+          .then(updatedProfile => res.json(updatedProfile));
       } else {
-        // Create
-
         // Check if handle exists
         Profile.findOne({ handle: profileFields.handle })
-          .then((profile) => {
-            if (profile) {
+          .then((usedProfile) => {
+            if (usedProfile) {
               errors.handle = 'That handle already exists';
-              res.status(400).json(errors);
+              return res.status(400).json(errors);
             }
 
             // save profile
-            new Profile(profileFields).save().then(profile => res.json(profile));
+            return new Profile(profileFields).save().then(newProfile => res.json(newProfile));
           });
       }
     });
+  return null;
 });
 
 /**
@@ -175,7 +173,7 @@ router.post('/experience', passport.authenticate('jwt', { session: false }), (re
     // Return any errors with 400 status
     return res.status(400).json(errors);
   }
- 
+
   Profile.findOne({ user: req.user.id })
     .then((profile) => {
       const newExp = {
@@ -190,8 +188,9 @@ router.post('/experience', passport.authenticate('jwt', { session: false }), (re
 
       // Add to exp array
       profile.experience.unshift(newExp);
-      profile.save().then(profile => res.json(profile));
+      return profile.save().then(newProfile => res.json(newProfile));
     });
+  return null;
 });
 
 /**
@@ -222,8 +221,9 @@ router.post('/education', passport.authenticate('jwt', { session: false }), (req
 
       // Add to exp array
       profile.education.unshift(newEdu);
-      profile.save().then(newProfile => res.json(newProfile));
+      return profile.save().then(newProfile => res.json(newProfile));
     });
+  return null;
 });
 
 /**
@@ -232,7 +232,6 @@ router.post('/education', passport.authenticate('jwt', { session: false }), (req
  * @access Private
  */
 router.delete('/experience/:exp_id', passport.authenticate('jwt', { session: false }), (req, res) => {
-
   Profile.findOne({ user: req.user.id })
     .then((profile) => {
       // Get remove index
@@ -255,7 +254,6 @@ router.delete('/experience/:exp_id', passport.authenticate('jwt', { session: fal
  * @access Private
  */
 router.delete('/education/:edu_id', passport.authenticate('jwt', { session: false }), (req, res) => {
-
   Profile.findOne({ user: req.user.id })
     .then((profile) => {
       // Get remove index
@@ -278,7 +276,6 @@ router.delete('/education/:edu_id', passport.authenticate('jwt', { session: fals
  * @access Private
  */
 router.delete('/', passport.authenticate('jwt', { session: false }), (req, res) => {
-
   Profile.findOneAndRemove({ user: req.user.id })
     .then(() => {
       User.findOneAndRemove({ _id: req.user.id })

@@ -55,12 +55,14 @@ router.post('/register', (req, res) => {
         bcrypt.hash(newUser.password, salt, (e, hash) => {
           if (e) throw e;
           newUser.password = hash;
-          newUser.save()
+          return newUser.save()
             .then(nuser => res.json(nuser))
-            .catch(err => console.log(err));
+            .catch(err => res.json(err));
         });
       });
+      return null;
     });
+  return null;
 });
 
 /**
@@ -74,8 +76,8 @@ router.post('/login', (req, res) => {
   if (!isValid) {
     return res.status(400).json(errors);
   }
-  const email = req.body.email;
-  const password = req.body.password;
+  const { email } = req.body;
+  const { password } = req.body;
 
   // Find user by email
   User.findOne({ email })
@@ -108,8 +110,11 @@ router.post('/login', (req, res) => {
             errors.password = 'Password incorrect';
             return res.status(400).json(errors);
           }
+          return null;
         });
+      return null;
     });
+  return null;
 });
 
 /**
@@ -118,7 +123,7 @@ router.post('/login', (req, res) => {
  * @access Private
  */
 router.get('/current', passport.authenticate('jwt', { session: false }), (req, res) => {
-  res.json({ 
+  res.json({
     id: req.user.id,
     name: req.user.name,
     email: req.user.email,

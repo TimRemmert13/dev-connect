@@ -3,59 +3,60 @@ const Validator = require('validator');
 
 module.exports = function validateProfileInput(data) {
   const errors = {};
+  const profile = data;
 
-  data.handle = !isEmpty(data.handle) ? data.handle : '';
-  data.status = !isEmpty(data.status) ? data.status : '';
-  data.skills = !isEmpty(data.skills) ? data.skills : '';
+  profile.handle = !isEmpty(profile.handle) ? profile.handle : '';
+  profile.status = !isEmpty(profile.status) ? profile.status : '';
+  profile.skills = !isEmpty(profile.skills) ? profile.skills : '';
 
-  if (!Validator.isLength(data.handle, { min: 2, max: 40 })) {
+  if (!Validator.isLength(profile.handle, { min: 2, max: 40 })) {
     errors.handle = 'Handle needs to be between 2 and 4 characters';
   }
 
-  if (Validator.isEmpty(data.handle)) {
+  if (Validator.isEmpty(profile.handle)) {
     errors.handle = 'Profile handle is required';
   }
 
-  if (Validator.isEmpty(data.status)) {
+  if (Validator.isEmpty(profile.status)) {
     errors.status = 'Profile status is required';
   }
 
-  if (Validator.isEmpty(data.skills)) {
+  if (Validator.isEmpty(profile.skills)) {
     errors.skills = 'Profile skills is required';
   }
 
-  if (!isEmpty(data.website)) {
-    if (!Validator.isURL(data.website)) {
+  if (!isEmpty(profile.website)) {
+    if (!Validator.isURL(profile.website)) {
       errors.website = 'Not a valid URL';
     }
   }
 
-  if (!isEmpty(data.youtube)) {
-    if (!Validator.isURL(data.youtube)) {
+  if (!isEmpty(profile.youtube)) {
+    if (!Validator.isURL(profile.youtube)) {
       errors.youtube = 'Not a valid URL';
     }
   }
 
-  if (!isEmpty(data.twitter)) {
-    if (!Validator.isURL(data.twitter)) {
+  if (!isEmpty(profile.twitter)) {
+    if (!Validator.isURL(profile.twitter)) {
       errors.twitter = 'Not a valid URL';
     }
   }
 
-  if (!isEmpty(data.facebook)) {
-    if (!Validator.isURL(data.facebook)) {
+  if (!isEmpty(profile.facebook)) {
+    if (!Validator.isURL(profile.facebook)) {
       errors.facebook = 'Not a valid URL';
     }
   }
 
-  if (!isEmpty(data.linkedIn)) {
-    if (!Validator.isURL(data.linkedIn)) {
+  if (!isEmpty(profile.linkedIn)) {
+    if (!Validator.isURL(profile.linkedIn)) {
       errors.linkedIn = 'Not a valid URL';
     }
   }
 
-  if (!isEmpty(data.instagram)) {
-    if (!Validator.isURL(data.instagram)) {
+  if (!isEmpty(profile.instagram)) {
+    if (!Validator.isURL(profile.instagram)) {
       errors.instagram = 'Not a valid URL';
     }
   }

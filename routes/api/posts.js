@@ -1,5 +1,4 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const passport = require('passport');
 
 const router = express.Router();
@@ -29,7 +28,7 @@ router.get('/', (req, res) => {
   Post.find()
     .sort({ date: -1 })
     .then(posts => res.json(posts))
-    .catch(err => res.status(404).json({ nopostfound: 'No posts found' }));
+    .catch(res.status(404).json({ nopostfound: 'No posts found' }));
 });
 
 /**
@@ -40,7 +39,7 @@ router.get('/', (req, res) => {
 router.get('/:id', (req, res) => {
   Post.find(req.params.id)
     .then(post => res.json(post))
-    .catch(err => res.status(404).json({ nopostfound: 'No posts found with that ID' }));
+    .catch(res.status(404).json({ nopostfound: 'No posts found with that ID' }));
 });
 
 /**
@@ -62,7 +61,7 @@ router.post('/', passport.authenticate('jwt', { session: false }), (req, res) =>
     user: req.user.id,
   });
 
-  newPost.save().then(post => res.json(post));
+  return newPost.save().then(post => res.json(post));
 });
 
 /**
@@ -72,7 +71,7 @@ router.post('/', passport.authenticate('jwt', { session: false }), (req, res) =>
  */
 router.delete('/:id', passport.authenticate('jwt', { session: false }), (req, res) => {
   Profile.findOne({ user: req.user.id })
-    .then((profile) => {
+    .then(() => {
       Post.findById(req.params.id)
         .then((post) => {
           // Check for post owner
@@ -80,9 +79,9 @@ router.delete('/:id', passport.authenticate('jwt', { session: false }), (req, re
             return res.status(401).json({ notauthorized: 'User not authorized' });
           }
           // Delete
-          post.remove().then(() => res.json({ success: true }));
+          return post.remove().then(() => res.json({ success: true }));
         })
-        .catch(err => res.status(404).json({ postnotfound: 'No post found' }));
+        .catch(res.status(404).json({ postnotfound: 'No post found' }));
     });
 });
 
@@ -93,7 +92,7 @@ router.delete('/:id', passport.authenticate('jwt', { session: false }), (req, re
  */
 router.post('/like/:id', passport.authenticate('jwt', { session: false }), (req, res) => {
   Profile.findOne({ user: req.user.id })
-    .then((profile) => {
+    .then(() => {
       Post.findById(req.params.id)
         .then((post) => {
           if (post.likes.filter(like => like.user.toString() === req.user.id).length > 0) {
@@ -101,9 +100,9 @@ router.post('/like/:id', passport.authenticate('jwt', { session: false }), (req,
           }
           // Add user id to likes array
           post.likes.unshift({ user: req.user.id });
-          post.save().then(newPost => res.json(newPost));
+          return post.save().then(newPost => res.json(newPost));
         })
-        .catch(err => res.status(404).json({ postnotfound: 'No post found' }));
+        .catch(res.status(404).json({ postnotfound: 'No post found' }));
     });
 });
 
@@ -114,7 +113,7 @@ router.post('/like/:id', passport.authenticate('jwt', { session: false }), (req,
  */
 router.post('/unlike/:id', passport.authenticate('jwt', { session: false }), (req, res) => {
   Profile.findOne({ user: req.user.id })
-    .then((profile) => {
+    .then(() => {
       Post.findById(req.params.id)
         .then((post) => {
           if (post.likes.filter(like => like.user.toString() === req.user.id).length === 0) {
@@ -125,13 +124,13 @@ router.post('/unlike/:id', passport.authenticate('jwt', { session: false }), (re
             .map(item => item.user.toString())
             .indexOf(req.user.id);
 
-            // Splice out of array
-            post.likes.splice(removeIndex, 1);
+          // Splice out of array
+          post.likes.splice(removeIndex, 1);
 
-            // Save
-            post.save().then(newPost => res.json(newPost));
+          // Save
+          return post.save().then(newPost => res.json(newPost));
         })
-        .catch(err => res.status(404).json({ postnotfound: 'No post found' }));
+        .catch(res.status(404).json({ postnotfound: 'No post found' }));
     });
 });
 
@@ -159,11 +158,12 @@ router.post('/comment/:id', passport.authenticate('jwt', { session: false }), (r
       post.comments.unshift(newComment);
 
       // Save
-      post.save().then(newPost => res.json(newPost));
+      return post.save().then(newPost => res.json(newPost));
     })
-    .catch(err => res.status(404).json({ postnotfound: 'No post found' }));
+    .catch(res.status(404).json({ postnotfound: 'No post found' }));
+  return null;
 });
-
+/* eslint-disable */
 /**
  * @route DELETE api/posts/comment/:id/:comment_id
  * @desc Remove comment from post
@@ -175,19 +175,20 @@ router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', { session
       // Check to see if comment exists
       if (post.comments.filter(comment => comment._id.toString() === req.params.comment_id).length === 0) {
         return res.status(404).json({ commentnotexists: 'Comment does not exist' });
-       }
+      }
 
-       // Get remove index
-       const removeIndex = post.comments
-         .map(item => item._id.toString())
-         .indexOf(req.params.comment_id);
+      // Get remove index
+      const removeIndex = post.comments
+        .map(item => item._id.toString())
+        .indexOf(req.params.comment_id);
 
       // Splice comment out of array
       post.comments.splice(removeIndex, 1);
 
-      post.save().then(newPost => res.json(newPost));
+      return post.save().then(newPost => res.json(newPost));
     })
-    .catch(err => res.status(404).json({ postnotfound: 'No post found' }));
+    .catch(res.status(404).json({ postnotfound: 'No post found' }));
 });
+/* eslint-enable */
 
 module.exports = router;
