@@ -163,7 +163,7 @@ router.post('/comment/:id', passport.authenticate('jwt', { session: false }), (r
     .catch(res.status(404).json({ postnotfound: 'No post found' }));
   return null;
 });
-/* eslint-disable */
+
 /**
  * @route DELETE api/posts/comment/:id/:comment_id
  * @desc Remove comment from post
@@ -173,7 +173,8 @@ router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', { session
   Post.findById(req.params.id)
     .then((post) => {
       // Check to see if comment exists
-      if (post.comments.filter(comment => comment._id.toString() === req.params.comment_id).length === 0) {
+      if (post.comments.filter(comment => comment._id.toString()
+      === req.params.comment_id).length === 0) {
         return res.status(404).json({ commentnotexists: 'Comment does not exist' });
       }
 
@@ -189,6 +190,5 @@ router.delete('/comment/:id/:comment_id', passport.authenticate('jwt', { session
     })
     .catch(res.status(404).json({ postnotfound: 'No post found' }));
 });
-/* eslint-enable */
 
 module.exports = router;
