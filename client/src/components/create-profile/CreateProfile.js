@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import TextFieldGroup from '../common/TextFieldGroup';
 import TextAreaFieldGroup from '../common/TextAreaFieldGroup';
 import InputGroup from '../common/InputGroup';
 import SelectListGroup from '../common/SelectListGroup';
+import { createProfile } from '../../actions/profileActions';
 
 class CreateProfile extends Component {
   constructor(props) {
@@ -28,9 +30,31 @@ class CreateProfile extends Component {
     };
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.errors) {
+      this.setState({ errors: nextProps.errors });
+    }
+  }
+
 onSubmit = (e) => {
   e.preventDefault();
-  console.log('submit');
+  const profileData = {
+    handle: this.state.handle,
+    company: this.state.company,
+    website: this.state.website,
+    location: this.state.location,
+    status: this.state.status,
+    skills: this.state.skills,
+    githubusername: this.state.githubusername,
+    bio: this.state.bio,
+    twitter: this.state.twitter,
+    facebook: this.state.facebook,
+    linkedIn: this.state.linkedIn,
+    youtube: this.state.youtube,
+    instagram: this.state.instagram,
+  };
+
+  this.props.createProfile(profileData, this.props.history);
 }
 
 onChange = (e) => {
@@ -105,7 +129,7 @@ render() {
     <div className="create-profile">
       <div className="container">
         <div className="row">
-            <div className="col-md-8 m-auto">
+          <div className="col-md-8 m-auto">
               <h1 className="display-4 text-center">Create Your Profile</h1>
               <p className="lead text-center">
                 Let's get some information to make your profile stand out
@@ -154,7 +178,7 @@ render() {
                   info="City or city and state suggested (eg. Boston, MA)"
                 />
                 <TextFieldGroup
-                  placeholder="* Skilld"
+                  placeholder="* Skills"
                   name="skills"
                   value={this.state.skills}
                   onChange={this.onChange}
@@ -179,6 +203,7 @@ render() {
                 />
                 <div className="mb-3">
                   <button
+                    type="button"
                     onClick={() => {
                     this.setState(prevState => ({
                       displaySocialInputs: !prevState.displaySocialInputs,
@@ -194,7 +219,7 @@ render() {
                 <input type="submit" value="submit" className="btn btn-info btn-block mt-4" />
               </form>
             </div>
-          </div>
+        </div>
       </div>
     </div>
   );
@@ -211,4 +236,4 @@ const mapStateToProps = state => ({
   errors: state.errors,
 });
 
-export default connect(mapStateToProps)(CreateProfile);
+export default connect(mapStateToProps, { createProfile })(withRouter(CreateProfile));
